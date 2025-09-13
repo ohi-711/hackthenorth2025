@@ -8,12 +8,14 @@
     "activeTab",
     "storage",
     "scripting",
-    "background"
+    "background",
+    "contextMenus"
   ],
   
   "host_permissions": [
     "https://api.cohere.ai/*",
     "https://rbc-investease-api.com/*",
+    "https://2dcq63co40.execute-api.us-east-1.amazonaws.com/*",
     "https://*.amazon.com/*",
     "https://*.amazon.ca/*",
     "https://*.ebay.com/*",

@@ -76,11 +76,30 @@ class StockSwapAPI {
 
       const data = await response.json();
       console.log('Team registration response:', data);
+      console.log('🔍 FULL REGISTRATION RESPONSE DEBUG:');
+      console.log('  Response keys:', Object.keys(data));
+      console.log('  Full response:', JSON.stringify(data, null, 2));
 
       if (data.jwtToken) {
         this.jwtToken = data.jwtToken;
         await chrome.storage.local.set({ jwtToken: this.jwtToken });
         console.log('JWT token stored successfully');
+        
+        // Debug JWT token format
+        console.log('🔍 JWT TOKEN DEBUG:');
+        console.log('  Length:', this.jwtToken.length);
+        console.log('  First 100 chars:', this.jwtToken.substring(0, 100));
+        console.log('  Contains dots:', this.jwtToken.includes('.'));
+        console.log('  Dot count:', (this.jwtToken.match(/\./g) || []).length);
+        
+        // Check if it's a valid JWT format (should have 3 parts separated by dots)
+        const parts = this.jwtToken.split('.');
+        console.log('  JWT parts count:', parts.length);
+        if (parts.length === 3) {
+          console.log('  Header length:', parts[0].length);
+          console.log('  Payload length:', parts[1].length);
+          console.log('  Signature length:', parts[2].length);
+        }
       } else {
         throw new Error('No JWT token in registration response');
       }
@@ -135,15 +154,157 @@ class StockSwapAPI {
     }
   }
 
+  async createPortfolio(strategy, amount) {
+    try {
+      console.log(`Creating ${strategy} portfolio with $${amount}...`);
+      
+      if (!this.clientId || !this.jwtToken) {
+        throw new Error('Missing client ID or JWT token for portfolio creation');
+      }
+
+      // Debug the authorization header that will be sent
+      const authHeader = `Bearer ${this.jwtToken}`;
+      console.log('🔍 PORTFOLIO API DEBUG:');
+      console.log('  Client ID:', this.clientId);
+      console.log('  JWT Token length:', this.jwtToken.length);
+      console.log('  JWT Token value:', this.jwtToken);
+      console.log('  Authorization header:', authHeader);
+      console.log('  Strategy:', strategy);
+      console.log('  Amount:', amount);
+
+      // Try different authentication methods based on the error
+      let headers = {
+        'Content-Type': 'application/json'
+      };
+
+      // The error suggests the API might expect a different format
+      // Let's try some alternatives:
+      console.log('🔍 TRYING DIFFERENT AUTH FORMATS:');
+      
+      // Method 1: Standard Bearer (current)
+      headers['Authorization'] = `Bearer ${this.jwtToken}`;
+      console.log('  Method 1 - Bearer:', headers['Authorization']);
+      
+      // Method 2: Try without Bearer prefix
+      // headers['Authorization'] = this.jwtToken;
+      
+      // Method 3: Try as API key
+      // headers['x-api-key'] = this.jwtToken;
+      
+      // Method 4: Try as custom header
+      // headers['x-jwt-token'] = this.jwtToken;
+
+      const response = await fetch(`${this.rbcBaseUrl}/portfolios`, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify({
+          client_id: this.clientId,
+          strategy: strategy, // 'conservative', 'balanced', 'aggressive'
+          initial_investment: amount
+        })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Portfolio creation failed:', response.status, errorText);
+        throw new Error(`Portfolio creation failed: ${response.status}`);
+      }
+
+      const portfolioData = await response.json();
+      console.log('Portfolio created successfully:', portfolioData);
+      
+      // Simulate the portfolio for 1 year
+      const simulationResponse = await fetch(`${this.rbcBaseUrl}/portfolios/${portfolioData.id}/simulate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${this.jwtToken}`
+        },
+        body: JSON.stringify({
+          years: 1
+        })
+      });
+
+      if (!simulationResponse.ok) {
+        console.warn('Portfolio simulation failed, using fallback calculation');
+        // Use fallback calculation
+        const fallbackMultipliers = {
+          conservative: 1.07,
+          balanced: 1.10,
+          aggressive: 1.15
+        };
+        return {
+          strategy,
+          initial_value: amount,
+          projected_value: amount * (fallbackMultipliers[strategy] || 1.10),
+          time_period: '1 year',
+          source: 'fallback'
+        };
+      }
+
+      const simulationData = await simulationResponse.json();
+      console.log('Portfolio simulation complete:', simulationData);
+      
+      return {
+        strategy,
+        initial_value: amount,
+        projected_value: simulationData.projected_value || amount * 1.10,
+        time_period: '1 year',
+        source: 'rbc_api',
+        portfolio_id: portfolioData.id
+      };
+
+    } catch (error) {
+      console.error('Portfolio creation/simulation failed:', error);
+      
+      // Fallback calculation
+      const fallbackMultipliers = {
+        conservative: 1.07,
+        balanced: 1.10,
+        aggressive: 1.15
+      };
+      
+      return {
+        strategy,
+        initial_value: amount,
+        projected_value: amount * (fallbackMultipliers[strategy] || 1.10),
+        time_period: '1 year',
+        source: 'fallback_error'
+      };
+    }
+  }
+
   async analyzeProduct(productData) {
     try {
-      console.log('Starting product analysis...');
+      console.log('Starting product analysis with RBC API...');
       
-      // Ensure we're initialized (but don't block on RBC API if it fails)
+      // Ensure we're initialized
       await this.ensureInitialized();
       
-      // Always return fallback suggestions for now to ensure reliability
-      return this.getFallbackSuggestions(productData);
+      if (!this.clientId || !this.jwtToken) {
+        console.warn('Missing RBC credentials, using fallback suggestions');
+        return this.getFallbackSuggestions(productData);
+      }
+
+      // Create portfolios for all three strategies
+      const strategies = ['conservative', 'balanced', 'aggressive'];
+      const portfolioPromises = strategies.map(strategy => 
+        this.createPortfolio(strategy, productData.price)
+      );
+      
+      console.log('Creating portfolios for all strategies...');
+      const portfolios = await Promise.all(portfolioPromises);
+      
+      // Get stock suggestions based on product category
+      const fallbackData = this.getFallbackSuggestions(productData);
+      
+      return {
+        stocks: fallbackData.stocks,
+        portfolios: portfolios,
+        education: fallbackData.education,
+        explanation: `Instead of spending $${productData.price} on this item, see how investing that money could grow:`,
+        api_source: portfolios.some(p => p.source === 'rbc_api') ? 'rbc_api' : 'fallback'
+      };
       
     } catch (error) {
       console.error('Product analysis failed:', error);
@@ -331,11 +492,12 @@ function isShoppingWebsite(url) {
 // Installation handler
 chrome.runtime.onInstalled.addListener(() => {
   console.log("StockSwap Shopping Advisor installed");
-  // Initialize storage
+  // Initialize storage with API key for demo
   chrome.storage.local.set({
     totalSavings: 0,
     avoidedPurchases: [],
     learningProgress: {},
+    cohereApiKey: "eL8tMALym78D2JyJipo3C7hF13e13tHxvZiBWT4b" // TODO: Move to secure config
   });
 });
 
