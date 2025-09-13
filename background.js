@@ -1,305 +1,366 @@
-// Smart Shopping Stock Advisor - Background Service Worker
-console.log('Smart Shopping Stock Advisor background script loaded!');
-
-// Extension installation and setup
-chrome.runtime.onInstalled.addListener((details) => {
-  console.log('Extension installed:', details.reason);
-  
-  if (details.reason === 'install') {
-    // Set default user settings
-    chrome.storage.sync.set({
-      userGoals: {
-        monthlyGoal: 1000,
-        riskLevel: 'moderate'
-      },
-      settings: {
-        notifications: true,
-        priceAlerts: true,
-        smartTips: true
-      },
-      monthlySavings: 0,
-      purchaseHistory: [],
-      lastResetDate: new Date().toISOString()
-    });
+class InvestSmartAPI {
+  constructor() {
+    this.rbcBaseUrl = "https://2dcq63co40.execute-api.us-east-1.amazonaws.com/dev";
+    this.cohereBaseUrl = "https://api.cohere.ai/v1";
+    this.cohereApiKey = ""; // replace with api key !!
+    this.jwtToken = null;
+    this.clientId = null;
+    this.initPromise = null;
+    this.isInitialized = false;
     
-    // Show welcome notification
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: '🎉 Smart Shopping Advisor Ready!',
-      message: 'Start making smarter financial decisions. Click the extension icon to set your goals.'
-    });
+    // Start initialization but don't await it in constructor
+    this.initPromise = this.init();
+  }
+
+  async init() {
+    try {
+      console.log('Initializing InvestSmart API...');
+      
+      // Load stored credentials
+      const stored = await chrome.storage.local.get(["jwtToken", "clientId"]);
+      this.jwtToken = stored.jwtToken;
+      this.clientId = stored.clientId;
+
+      console.log('Stored credentials:', { hasToken: !!this.jwtToken, hasClient: !!this.clientId });
+
+      // Register team if no token
+      if (!this.jwtToken) {
+        console.log('No JWT token, registering team...');
+        await this.registerTeam();
+      }
+
+      // Create client if no client ID
+      if (!this.clientId && this.jwtToken) {
+        console.log('No client ID, creating client...');
+        await this.createClient();
+      }
+
+      this.isInitialized = true;
+      console.log('InvestSmart API initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize InvestSmart API:', error);
+      this.isInitialized = false;
+    }
+  }
+
+  // Ensure API is initialized before any operation
+  async ensureInitialized() {
+    if (!this.isInitialized && this.initPromise) {
+      await this.initPromise;
+    }
+    return this.isInitialized;
+  }
+
+  async registerTeam() {
+    try {
+      console.log('Registering team with RBC API...');
+      
+      const response = await fetch(`${this.rbcBaseUrl}/teams/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          team_name: `InvestSmart_${Date.now()}`, // Make team name unique
+          contact_email: `team${Date.now()}@investsmart.com`,
+        }),
+      });
+
+      console.log('Registration response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Registration failed:', errorText);
+        throw new Error(`Registration failed: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Team registration response:', data);
+
+      if (data.jwtToken) {
+        this.jwtToken = data.jwtToken;
+        await chrome.storage.local.set({ jwtToken: this.jwtToken });
+        console.log('JWT token stored successfully');
+      } else {
+        throw new Error('No JWT token in registration response');
+      }
+    } catch (error) {
+      console.error('Failed to register team:', error);
+      throw error;
+    }
+  }
+
+  async createClient(userName = "Student User", userEmail = "student@university.com") {
+    try {
+      console.log('Creating client with RBC API...');
+      
+      if (!this.jwtToken) {
+        throw new Error('No JWT token available for client creation');
+      }
+
+      const response = await fetch(`${this.rbcBaseUrl}/clients`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${this.jwtToken}`,
+        },
+        body: JSON.stringify({
+          name: userName,
+          email: userEmail,
+          cash: 0,
+        }),
+      });
+
+      console.log('Client creation response status:', response.status);
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Client creation failed:', errorText);
+        throw new Error(`Client creation failed: ${response.status} ${errorText}`);
+      }
+
+      const data = await response.json();
+      console.log('Client creation response:', data);
+
+      if (data.id) {
+        this.clientId = data.id;
+        await chrome.storage.local.set({ clientId: this.clientId });
+        console.log('Client ID stored successfully');
+      } else {
+        throw new Error('No client ID in creation response');
+      }
+    } catch (error) {
+      console.error('Failed to create client:', error);
+      throw error;
+    }
+  }
+
+  async analyzeProduct(productData) {
+    try {
+      console.log('Starting product analysis...');
+      
+      // Ensure we're initialized (but don't block on RBC API if it fails)
+      await this.ensureInitialized();
+      
+      // Always return fallback suggestions for now to ensure reliability
+      return this.getFallbackSuggestions(productData);
+      
+    } catch (error) {
+      console.error('Product analysis failed:', error);
+      return this.getFallbackSuggestions(productData);
+    }
+  }
+
+  getFallbackSuggestions(productData) {
+    console.log('Generating fallback suggestions for:', productData);
+    
+    const suggestions = {
+      electronics: { stocks: ["AAPL", "MSFT"], strategy: "balanced" },
+      gaming: { stocks: ["NVDA", "AMD"], strategy: "aggressive" },
+      fashion: { stocks: ["NKE", "LULU"], strategy: "balanced" },
+      shoes: { stocks: ["NKE", "ADDYY"], strategy: "balanced" },
+      clothing: { stocks: ["NKE", "LULU"], strategy: "balanced" },
+      tech: { stocks: ["MSFT", "GOOGL"], strategy: "balanced" },
+      home: { stocks: ["HD", "LOW"], strategy: "conservative" },
+      dockers: { stocks: ["VFC", "NKE"], strategy: "balanced" }
+    };
+
+    const category = (productData.category || '').toLowerCase();
+    const name = (productData.name || '').toLowerCase();
+    const brand = (productData.brand || '').toLowerCase();
+    
+    // Try to match category, product name, or brand
+    for (const [key, value] of Object.entries(suggestions)) {
+      if (category.includes(key) || name.includes(key) || brand.includes(key)) {
+        return {
+          stocks: value.stocks,
+          strategy: value.strategy,
+          education: `Learn about investing in ${value.stocks.join(", ")} - companies in the ${key} sector that could benefit from consumer trends.`,
+          explanation: `Instead of spending $${productData.price} on this ${key} item, consider investing in related companies like ${value.stocks.join(" or ")} for potential long-term growth.`,
+        };
+      }
+    }
+
+    // Default fallback
+    return {
+      stocks: ["SPY", "VTI"],
+      strategy: "balanced",
+      education: "Learn about diversified index fund investing with broad market ETFs that track the S&P 500 and total stock market.",
+      explanation: `Consider investing your $${productData.price} in a diversified index fund instead. Historical market returns suggest this could grow to approximately $${(productData.price * 1.10).toFixed(2)} in one year.`,
+    };
+  }
+}
+
+// Initialize API instance
+const investSmartAPI = new InvestSmartAPI();
+
+// Keep service worker alive
+console.log('InvestSmart background script loaded');
+
+// Message handling
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('Background received message:', message);
+  console.log('Sender:', sender);
+  
+  // Handle each action type
+  switch (message.action) {
+    case "analyzeProduct":
+      handleAnalyzeProduct(message, sendResponse);
+      return true; // Keep channel open for async response
+      
+    case "trackAvoidedPurchase":
+      handleTrackPurchase(message, sendResponse);
+      return true;
+      
+    default:
+      console.log('Unknown action:', message.action);
+      sendResponse({ error: `Unknown action: ${message.action}` });
+      return false;
   }
 });
 
+async function handleAnalyzeProduct(message, sendResponse) {
+  try {
+    console.log('Analyzing product:', message.productData);
+    
+    const result = await investSmartAPI.analyzeProduct(message.productData);
+    console.log('Analysis result:', result);
+    
+    sendResponse(result);
+  } catch (error) {
+    console.error('Analysis error:', error);
+    // Absolute fallback
+    sendResponse({
+      stocks: ["SPY", "VTI"],
+      strategy: "balanced",
+      education: `Learn about investing in index funds instead of spending $${message.productData?.price || 100}`,
+      explanation: "Instead of buying this item, consider investing in a diversified portfolio for long-term growth."
+    });
+  }
+}
+
+async function handleTrackPurchase(message, sendResponse) {
+  try {
+    const result = await trackAvoidedPurchase(message.productData);
+    sendResponse(result);
+  } catch (error) {
+    console.error('Track purchase error:', error);
+    sendResponse({ error: error.message });
+  }
+}
+
+async function trackAvoidedPurchase(productData) {
+  try {
+    // Store avoided purchase in local storage for tracking
+    const stored = await chrome.storage.local.get([
+      "avoidedPurchases",
+      "totalSavings",
+    ]);
+    const avoidedPurchases = stored.avoidedPurchases || [];
+    const totalSavings = stored.totalSavings || 0;
+
+    const newPurchase = {
+      ...productData,
+      timestamp: new Date().toISOString(),
+      id: Date.now().toString(),
+    };
+
+    avoidedPurchases.push(newPurchase);
+    const newTotalSavings = totalSavings + productData.price;
+
+    await chrome.storage.local.set({
+      avoidedPurchases: avoidedPurchases.slice(-50), // Keep last 50 purchases
+      totalSavings: newTotalSavings,
+    });
+
+    // Show success notification
+    chrome.notifications.create({
+      type: "basic",
+      iconUrl: "assets/icon48.png",
+      title: "Smart Choice!",
+      message: `You saved $${productData.price}! Total savings: $${newTotalSavings.toFixed(2)}`,
+    });
+
+    return { success: true, totalSavings: newTotalSavings };
+  } catch (error) {
+    console.error("Failed to track avoided purchase:", error);
+    throw error;
+  }
+}
+
 // Handle tab updates - detect shopping sites
 chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
-  if (changeInfo.status === 'complete' && tab.url) {
-    const isShoppingSite = await isShoppingWebsite(tab.url);
-    
+  if (changeInfo.status === "complete" && tab.url) {
+    const isShoppingSite = isShoppingWebsite(tab.url);
     if (isShoppingSite) {
-      // Inject content script if not already injected
+      // Inject shopping detection
       try {
         await chrome.scripting.executeScript({
           target: { tabId: tabId },
           func: () => {
-            if (!document.getElementById('shopping-advisor-btn')) {
-              console.log('Injecting shopping advisor on:', window.location.hostname);
-            }
-          }
+            // Signal to content script that this is a shopping site
+            window.postMessage({ type: "INVESTSMART_SHOPPING_SITE" }, "*");
+          },
         });
-        
-        // Show shopping site notification
-        const settings = await chrome.storage.sync.get(['settings']);
-        if (settings.settings?.notifications) {
-          showShoppingAlert(tab.url);
-        }
       } catch (error) {
-        console.log('Could not inject script:', error);
+        console.log("Could not inject script:", error);
       }
     }
   }
 });
 
-// Detect if website is a shopping site
 function isShoppingWebsite(url) {
   try {
     const hostname = new URL(url).hostname.toLowerCase();
     const shoppingSites = [
-      'amazon.com', 'amazon.ca', 'amazon.co.uk', 'amazon.de',
-      'ebay.com', 'walmart.com', 'target.com', 'bestbuy.com',
-      'shopify.com', 'etsy.com', 'alibaba.com', 'aliexpress.com',
-      'newegg.com', 'costco.com', 'homedepot.com', 'wayfair.com',
-      'overstock.com', 'zappos.com', 'nordstrom.com', 'macys.com'
+      "amazon.com",
+      "amazon.ca", 
+      "ebay.com",
+      "walmart.com",
+      "target.com",
+      "bestbuy.com",
+      "shopify.com",
+      "etsy.com",
     ];
-    
-    return shoppingSites.some(site => hostname.includes(site)) || 
-           hostname.includes('shop') || hostname.includes('store') || hostname.includes('buy');
+    return shoppingSites.some((site) => hostname.includes(site));
   } catch {
     return false;
   }
 }
 
-// Show shopping alert notification
-async function showShoppingAlert(url) {
-  try {
-    const hostname = new URL(url).hostname;
-    const userData = await chrome.storage.sync.get(['userGoals', 'monthlySavings']);
-    const monthlyGoal = userData.userGoals?.monthlyGoal || 1000;
-    const currentSavings = userData.monthlySavings || 0;
-    const remaining = monthlyGoal - currentSavings;
-    
-    if (remaining > 0) {
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: '💰 Smart Shopping Alert',
-        message: `Shopping on ${hostname}? You have $${remaining.toFixed(2)} left in your monthly budget.`
-      });
-    }
-  } catch (error) {
-    console.error('Error showing shopping alert:', error);
-  }
-}
-
-// Handle messages from content scripts and popup
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-  console.log('Background received message:', request);
-
-  switch (request.action) {
-    case 'trackPurchaseDecision':
-      handlePurchaseTracking(request.data);
-      sendResponse({ success: true });
-      break;
-      
-    /*case 'getStockData':
-      getStockRecommendations(request.price, request.goals)
-        .then(data => sendResponse({ success: true, data }))
-        .catch(error => sendResponse({ success: false, error: error.message }));
-      return true; // Keep message channel open for async response*/
-      
-    case 'exportData':
-      exportUserData()
-        .then(data => sendResponse({ success: true, data }))
-        .catch(error => sendResponse({ success: false, error: error.message }));
-      return true;
-      
-    default:
-      sendResponse({ success: false, error: 'Unknown action' });
-  }
+// Installation handler
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("InvestSmart Shopping Advisor installed");
+  // Initialize storage
+  chrome.storage.local.set({
+    totalSavings: 0,
+    avoidedPurchases: [],
+    learningProgress: {},
+  });
 });
 
-// Track purchase decisions and savings
-async function handlePurchaseTracking(data) {
-  try {
-    const result = await chrome.storage.sync.get(['purchaseHistory', 'monthlySavings']);
-    const history = result.purchaseHistory || [];
-    const currentSavings = result.monthlySavings || 0;
-    
-    // Add to purchase history
-    const purchaseRecord = {
-      ...data,
-      timestamp: new Date().toISOString(),
-      id: Date.now().toString()
-    };
-    
-    history.push(purchaseRecord);
-    
-    // Update monthly savings if it's a "saved" purchase
-    let newSavings = currentSavings;
-    if (data.decision === 'skip_purchase') {
-      newSavings += data.amount || 0;
-    }
-    
-    await chrome.storage.sync.set({
-      purchaseHistory: history.slice(-100), // Keep last 100 records
-      monthlySavings: newSavings
-    });
-    
-    // Show congratulatory notification for savings
-    if (data.decision === 'skip_purchase') {
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'icons/icon48.png',
-        title: '🎉 Great Decision!',
-        message: `You saved $${data.amount?.toFixed(2) || 0}! Total monthly savings: $${newSavings.toFixed(2)}`
-      });
-    }
-  } catch (error) {
-    console.error('Error tracking purchase:', error);
-  }
-}
-
-// Get stock recommendations
-async function getStockRecommendations(price, goals) {
-  
-  const { monthlyGoal = 1000, riskLevel = 'moderate' } = goals;
-  const budgetImpact = price / monthlyGoal;
-  
-  if (budgetImpact > 0.3) {
-    return {
-      shouldBuy: false,
-      reasoning: `This purchase represents ${(budgetImpact * 100).toFixed(0)}% of your monthly goal. Consider investing instead.`,
-      alternative: `Invest $${price.toFixed(2)} in a diversified portfolio for potential long-term growth.`,
-      stocks: []
-    };
-  }
-
-  return {
-    shouldBuy: true,
-    reasoning: `This purchase fits your budget. Here's how you could invest ${price.toFixed(2)} instead:`,
-    //stocks: recommendations.slice(0, 3) // Top 3 recommendations
-  };
-}
-
-// Export user data for analysis
-async function exportUserData() {
-  try {
-    const allData = await chrome.storage.sync.get(null);
-    return {
-      exportDate: new Date().toISOString(),
-      ...allData
-    };
-  } catch (error) {
-    console.error('Error exporting data:', error);
-    throw error;
-  }
-}
-
-// Show daily financial tip
-async function showDailyFinancialTip() {
-  try {
-    const settings = await chrome.storage.sync.get(['settings']);
-    if (!settings.settings?.smartTips) return;
-    
-    const tips = [
-      "💡 The average American spends $1,986 per year on impulse purchases. Track yours!",
-      "📊 Investing $100/month for 30 years at 7% return = $121,997. Start today!",
-      "🎯 The 24-hour rule: Wait a day before any non-essential purchase over $50.",
-      "💰 Pay yourself first: Set up automatic transfers to savings before spending.",
-      "📈 Dollar-cost averaging: Invest the same amount regularly, regardless of market conditions.",
-      "🛡️ Emergency fund goal: 3-6 months of expenses in a high-yield savings account.",
-      "🔄 Review and cancel unused subscriptions monthly. Average savings: $273/year.",
-      "📱 Use the extension before every online purchase to stay on track with your goals!"
-    ];
-    
-    const randomTip = tips[Math.floor(Math.random() * tips.length)];
-    
-    chrome.notifications.create({
-      type: 'basic',
-      iconUrl: 'icons/icon48.png',
-      title: '💡 Daily Financial Tip',
-      message: randomTip
-    });
-  } catch (error) {
-    console.error('Error showing daily tip:', error);
-  }
-}
-
-// Context menu for quick actions
+// Context menu for quick analysis
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
-    id: "quickAnalyze",
-    title: "💰 Analyze this price with Smart Shopping Advisor",
-    contexts: ["selection"]
-  });
-  
-  chrome.contextMenus.create({
-    id: "openAdvisor",
-    title: "📊 Open Smart Shopping Advisor",
-    contexts: ["page"]
+    id: "analyzePrice",
+    title: "Analyze with InvestSmart",
+    contexts: ["selection"],
   });
 });
 
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId === "quickAnalyze" && info.selectionText) {
-    // Extract price from selected text
-    const priceMatch = info.selectionText.match(/\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/);
+  if (info.menuItemId === "analyzePrice" && info.selectionText) {
+    const priceMatch = info.selectionText.match(
+      /\$?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/
+    );
     if (priceMatch) {
-      const price = parseFloat(priceMatch[1].replace(/,/g, ''));
-      
-      // Send message to content script to show investment tip
+      const price = parseFloat(priceMatch[1].replace(/,/g, ""));
       chrome.tabs.sendMessage(tab.id, {
-        action: 'showInvestmentTip',
-        price: price
+        action: "showInvestmentSuggestion",
+        price: price,
       });
     }
   }
-  
-  if (info.menuItemId === "openAdvisor") {
-    // Open extension popup (this will open the popup programmatically)
-    chrome.action.openPopup();
-  }
 });
 
-// Handle notification clicks
-chrome.notifications.onClicked.addListener((notificationId) => {
-  // Open the extension when notification is clicked
-  chrome.action.openPopup();
-});
-
-// Badge management - show savings progress
-async function updateBadge() {
-  try {
-    const result = await chrome.storage.sync.get(['userGoals', 'monthlySavings']);
-    const monthlyGoal = result.userGoals?.monthlyGoal || 1000;
-    const currentSavings = result.monthlySavings || 0;
-    const percentage = Math.min(Math.floor((currentSavings / monthlyGoal) * 100), 100);
-    
-    chrome.action.setBadgeText({
-      text: percentage > 0 ? `${percentage}%` : ''
-    });
-    
-    chrome.action.setBadgeBackgroundColor({
-      color: percentage >= 100 ? '#4CAF50' : percentage >= 50 ? '#FF9800' : '#F44336'
-    });
-  } catch (error) {
-    console.error('Error updating badge:', error);
-  }
-}
-
-// Update badge periodically
-setInterval(updateBadge, 30000); // Every 30 seconds
-updateBadge(); // Initial call
-
-console.log('Smart Shopping Stock Advisor background script fully initialized!');
+console.log("InvestSmart Shopping Advisor background script loaded!");

@@ -1,27 +1,32 @@
 {
   "manifest_version": 3,
-  "name": "Smart Shopping Stock Advisor",
-  "version": "1.0",
-  "description": "Analyzes shopping prices and recommends stocks based on your savings goals",
+  "name": "InvestSmart Shopping Advisor",
+  "version": "1.0.0",
+  "description": "Transform online shopping impulses into investment learning opportunities with RBC InvestEase and Cohere AI",
   
   "permissions": [
     "activeTab",
     "storage",
-    "scripting"
+    "scripting",
+    "background"
   ],
   
   "host_permissions": [
-    "https://api.polygon.io/*",
-    "https://financialmodelingprep.com/*",
+    "https://api.cohere.ai/*",
+    "https://rbc-investease-api.com/*",
+    "https://*.amazon.com/*",
+    "https://*.amazon.ca/*",
+    "https://*.ebay.com/*",
+    "https://*.walmart.com/*",
+    "https://*.target.com/*",
+    "https://*.bestbuy.com/*",
+    "https://*.shopify.com/*",
     "https://*/*"
   ],
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "Smart Shopping Stock Advisor",
-    "default_icon": {
-      
-    }
+    "default_title": "InvestSmart Shopping Advisor"
   },
   
   "content_scripts": [
@@ -37,7 +42,8 @@
         "https://*/*"
       ],
       "js": ["content.js"],
-      "css": ["content.css"]
+      "css": ["content.css"],
+      "run_at": "document_end"
     }
   ],
   
@@ -45,13 +51,9 @@
     "service_worker": "background.js"
   },
   
-  "icons": {
-    
-  },
-  
   "web_accessible_resources": [
     {
-      "resources": ["icons/*"],
+      "resources": ["popup.html", "popup.css", "content.css"],
       "matches": ["<all_urls>"]
     }
   ]

@@ -1,199 +1,112 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <style>
-    body {
-      width: 380px;
-      padding: 20px;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      margin: 0;
-    }
-    
-    .container {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(10px);
-      border-radius: 15px;
-      padding: 20px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-    
-    h1 {
-      font-size: 20px;
-      margin-bottom: 15px;
-      color: #fff;
-      text-align: center;
-      font-weight: 600;
-    }
-    
-    .section {
-      margin-bottom: 20px;
-      padding: 15px;
-      background: rgba(255, 255, 255, 0.05);
-      border-radius: 10px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-    }
-    
-    .section h3 {
-      margin: 0 0 10px 0;
-      font-size: 16px;
-      color: #fff;
-    }
-    
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin: 5px 0;
-      border: none;
-      border-radius: 8px;
-      font-size: 14px;
-      box-sizing: border-box;
-    }
-    
-    input, select {
-      background: rgba(255, 255, 255, 0.9);
-      color: #333;
-    }
-    
-    button {
-      background: linear-gradient(45deg, #4CAF50, #45a049);
-      color: white;
-      cursor: pointer;
-      font-weight: 600;
-      transition: transform 0.2s;
-    }
-    
-    button:hover {
-      transform: translateY(-2px);
-    }
-    
-    button:disabled {
-      background: #ccc;
-      cursor: not-allowed;
-      transform: none;
-    }
-    
-    .detected-price {
-      background: rgba(76, 175, 80, 0.2);
-      border: 1px solid rgba(76, 175, 80, 0.5);
-      padding: 10px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    
-    .stock-recommendation {
-      background: rgba(33, 150, 243, 0.2);
-      border: 1px solid rgba(33, 150, 243, 0.5);
-      padding: 15px;
-      border-radius: 8px;
-      margin: 10px 0;
-    }
-    
-    .stock-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 8px;
-      background: rgba(255, 255, 255, 0.1);
-      border-radius: 5px;
-      margin: 5px 0;
-    }
-    
-    .stock-symbol {
-      font-weight: bold;
-      color: #4CAF50;
-    }
-    
-    .stock-price {
-      font-size: 12px;
-      opacity: 0.8;
-    }
-    
-    #status {
-      margin-top: 10px;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 14px;
-      text-align: center;
-    }
-    
-    .success {
-      background-color: rgba(76, 175, 80, 0.3);
-      border: 1px solid rgba(76, 175, 80, 0.5);
-    }
-    
-    .error {
-      background-color: rgba(244, 67, 54, 0.3);
-      border: 1px solid rgba(244, 67, 54, 0.5);
-    }
-    
-    .loading {
-      background-color: rgba(255, 193, 7, 0.3);
-      border: 1px solid rgba(255, 193, 7, 0.5);
-    }
-    
-    .savings-goal {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    
-    .progress-bar {
-      width: 100%;
-      height: 6px;
-      background: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
-      overflow: hidden;
-      margin: 5px 0;
-    }
-    
-    .progress-fill {
-      height: 100%;
-      background: linear-gradient(90deg, #4CAF50, #8BC34A);
-      transition: width 0.3s;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestSmart Shopping Advisor</title>
+    <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-  <div class="container">
-    <h1>💰 Smart Shopping Assistant</h1>
-    
-    <!-- Savings Goals Section -->
-    <div class="section">
-      <h3>💎 Your Savings Goal</h3>
-      <input type="number" id="savingsGoal" placeholder="Monthly savings goal ($)" min="0">
-      <select id="riskLevel">
-        <option value="conservative">Conservative (Low Risk)</option>
-        <option value="moderate">Moderate (Medium Risk)</option>
-        <option value="aggressive">Aggressive (High Risk)</option>
-      </select>
-      <button id="saveGoals">Save Goals</button>
-      <div class="progress-bar">
-        <div class="progress-fill" id="progressFill" style="width: 0%"></div>
-      </div>
-      <div id="savedAmount">Saved this month: $0</div>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">💡💰</span>
+                <h1>InvestSmart</h1>
+            </div>
+            <p class="tagline">Transform shopping into smart investing</p>
+        </header>
+
+        <!-- Stats Dashboard -->
+        <section class="stats-section">
+            <div class="stat-card">
+                <div class="stat-value" id="total-savings">$0.00</div>
+                <div class="stat-label">Total Saved</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value" id="purchases-avoided">0</div>
+                <div class="stat-label">Purchases Avoided</div>
+            </div>
+        </section>
+
+        <!-- Current Session -->
+        <section class="session-section">
+            <h3>🛍️ Current Shopping Session</h3>
+            <div id="current-product" class="product-card hidden">
+                <div class="product-info">
+                    <h4 id="product-name">Product Name</h4>
+                    <p id="product-price">$0.00</p>
+                </div>
+                <button id="analyze-btn" class="primary-btn">Analyze Investment Alternative</button>
+            </div>
+            <div id="no-product" class="no-product">
+                <p>Navigate to a shopping website to see investment alternatives!</p>
+                <div class="supported-sites">
+                    <small>Supported: Amazon, eBay, Best Buy, Walmart, Target</small>
+                </div>
+            </div>
+        </section>
+
+        <!-- Learning Progress -->
+        <section class="learning-section">
+            <h3>📚 Your Investment Learning</h3>
+            <div class="progress-item">
+                <span>Portfolio Strategies</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 60%"></div>
+                </div>
+            </div>
+            <div class="progress-item">
+                <span>Stock Knowledge</span>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 40%"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="actions-section">
+            <h3>🚀 Quick Actions</h3>
+            <div class="action-grid">
+                <button id="portfolio-simulator" class="action-btn">
+                    <span class="action-icon">📊</span>
+                    <span>Portfolio Simulator</span>
+                </button>
+                <button id="education-hub" class="action-btn">
+                    <span class="action-icon">🎓</span>
+                    <span>Education Hub</span>
+                </button>
+                <button id="savings-tracker" class="action-btn">
+                    <span class="action-icon">💰</span>
+                    <span>Savings Tracker</span>
+                </button>
+                <button id="strategy-comparison" class="action-btn">
+                    <span class="action-icon">⚖️</span>
+                    <span>Strategy Compare</span>
+                </button>
+            </div>
+        </section>
+
+        <!-- Recent Activity -->
+        <section class="activity-section">
+            <h3>📈 Recent Activity</h3>
+            <div id="recent-activity" class="activity-list">
+                <!-- Activity items will be populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-links">
+                <button id="settings-btn" class="footer-btn">⚙️ Settings</button>
+                <button id="help-btn" class="footer-btn">❓ Help</button>
+            </div>
+            <div class="powered-by">
+                <small>Powered by RBC InvestEase & Cohere AI</small>
+            </div>
+        </footer>
     </div>
-    
-    <!-- Price Detection Section -->
-    <div class="section">
-      <h3>🛍️ Price Analysis</h3>
-      <button id="detectPrice">Detect Price on Page</button>
-      <div id="detectedPrice"></div>
-      <input type="number" id="manualPrice" placeholder="Or enter price manually ($)" step="0.01" min="0">
-    </div>
-    
-    <!-- Stock Recommendations -->
-    <div class="section">
-      <h3>📈 Stock Recommendations</h3>
-      <button id="getRecommendations" disabled>Get Smart Recommendations</button>
-      <div id="recommendations"></div>
-    </div>
-    
-    <div id="status"></div>
-  </div>
-  
-  <script src="popup.js"></script>
+
+    <script src="popup.js"></script>
 </body>
 </html>

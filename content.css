@@ -1,306 +1,332 @@
-@keyframes fadeIn {
-  from { 
-    opacity: 0; 
-    transform: scale(0.9); 
-  }
-  to { 
-    opacity: 1; 
-    transform: scale(1); 
-  }
+/* InvestSmart Shopping Advisor - Content Script Styles */
+
+/* Floating Button Styles */
+#investsmart-btn {
+  position: fixed !important;
+  top: 20px !important;
+  right: 20px !important;
+  z-index: 999999 !important;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+  border: none !important;
+  border-radius: 50px !important;
+  width: 120px !important;
+  height: 50px !important;
+  cursor: pointer !important;
+  font-size: 16px !important;
+  font-weight: bold !important;
+  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4) !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  backdrop-filter: blur(10px) !important;
+  border: 2px solid rgba(255, 255, 255, 0.2) !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+#investsmart-btn:hover {
+  transform: scale(1.05) !important;
+  box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6) !important;
+}
+
+/* Modal Styles */
+#investsmart-modal {
+  position: fixed !important;
+  z-index: 1000000 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0,0,0,0.5) !important;
+  backdrop-filter: blur(5px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.investsmart-modal-content {
+  background: white !important;
+  padding: 30px !important;
+  border-radius: 15px !important;
+  max-width: 600px !important;
+  max-height: 80vh !important;
+  overflow-y: auto !important;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1) !important;
+  position: relative !important;
+  animation: slideIn 0.3s ease-out !important;
 }
 
 @keyframes slideIn {
-  from { 
-    transform: translateX(100%); 
-    opacity: 0; 
-  }
-  to { 
-    transform: translateX(0); 
-    opacity: 1; 
-  }
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }
 
-@keyframes slideOut {
-  from { 
-    transform: translateX(0); 
-    opacity: 1; 
-  }
-  to { 
-    transform: translateX(100%); 
-    opacity: 0; 
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { 
-    transform: scale(1); 
-  }
-  50% { 
-    transform: scale(1.05); 
-  }
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% {
-    transform: translateY(0);
-  }
-  40% {
-    transform: translateY(-10px);
-  }
-  60% {
-    transform: translateY(-5px);
-  }
-}
-
-/* Advisor Button Styles */
-#shopping-advisor-btn {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  animation: bounce 2s infinite;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
-}
-
-#shopping-advisor-btn:hover {
-  animation: none !important;
-}
-
-#shopping-advisor-btn:active {
-  transform: scale(0.95) !important;
-}
-
-/* Investment Tip Modal Styles */
-#investment-tip-overlay {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-}
-
-#investment-tip-overlay .tip-content {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-  border-radius: 15px !important;
-  max-width: 500px !important;
-  width: 90% !important;
-  max-height: 80vh !important;
-  overflow-y: auto !important;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3) !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(10px) !important;
-  animation: fadeIn 0.3s ease-out !important;
-}
-
-#investment-tip-overlay .tip-header {
+.modal-header {
   display: flex !important;
   justify-content: space-between !important;
   align-items: center !important;
-  padding: 20px 25px 15px !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2) !important;
-  font-size: 18px !important;
-  font-weight: 600 !important;
-  color: white !important;
+  margin-bottom: 20px !important;
+  border-bottom: 2px solid #f0f0f0 !important;
+  padding-bottom: 15px !important;
 }
 
-#investment-tip-overlay .close-btn {
+.modal-header h2 {
+  color: #333 !important;
+  margin: 0 !important;
+  font-size: 24px !important;
+}
+
+.close {
+  font-size: 28px !important;
+  cursor: pointer !important;
+  color: #aaa !important;
   background: none !important;
   border: none !important;
-  color: white !important;
-  font-size: 24px !important;
-  cursor: pointer !important;
-  opacity: 0.7 !important;
-  transition: opacity 0.2s !important;
   padding: 0 !important;
-  margin: 0 !important;
+  line-height: 1 !important;
 }
 
-#investment-tip-overlay .close-btn:hover {
-  opacity: 1 !important;
-  transform: scale(1.1) !important;
+.close:hover {
+  color: #000 !important;
 }
 
-#investment-tip-overlay .tip-body {
-  padding: 20px 25px !important;
-  color: white !important;
-  line-height: 1.5 !important;
-}
-
-#investment-tip-overlay .price-info {
-  background: rgba(255, 255, 255, 0.1) !important;
+.product-info {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
   padding: 15px !important;
   border-radius: 10px !important;
   margin-bottom: 20px !important;
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: center !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-left: 4px solid #2196f3 !important;
 }
 
-#investment-tip-overlay .price-label {
-  font-size: 16px !important;
-  opacity: 0.9 !important;
+.product-info p {
+  margin: 0 !important;
+  font-size: 18px !important;
+  color: #333 !important;
 }
 
-#investment-tip-overlay .price-value {
-  font-size: 24px !important;
-  font-weight: bold !important;
-  color: #4CAF50 !important;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
-}
-
-#investment-tip-overlay .investment-suggestion {
+.investment-suggestion {
   margin-bottom: 25px !important;
 }
 
-#investment-tip-overlay .investment-suggestion p {
-  margin: 10px 0 !important;
+.investment-suggestion h3 {
+  color: #333 !important;
+  margin-bottom: 15px !important;
+  font-size: 20px !important;
 }
 
-#investment-tip-overlay .investment-suggestion ul {
-  margin: 15px 0 !important;
-  padding-left: 20px !important;
-  list-style-type: none !important;
-}
-
-#investment-tip-overlay .investment-suggestion li {
-  margin: 10px 0 !important;
-  line-height: 1.4 !important;
-  position: relative !important;
-  padding-left: 20px !important;
-}
-
-#investment-tip-overlay .investment-suggestion li::before {
-  content: "📈" !important;
-  position: absolute !important;
-  left: 0 !important;
-}
-
-#investment-tip-overlay .potential-growth {
-  background: rgba(76, 175, 80, 0.2) !important;
-  border: 1px solid rgba(76, 175, 80, 0.5) !important;
+.stocks-suggestion, .education-content {
+  background: #f8f9fa !important;
   padding: 15px !important;
-  border-radius: 10px !important;
-  text-align: center !important;
-  margin-top: 15px !important;
+  border-radius: 8px !important;
+  margin: 15px 0 !important;
+}
+
+.stocks-suggestion h4, .education-content h4 {
+  color: #333 !important;
+  margin-bottom: 10px !important;
   font-size: 16px !important;
 }
 
-#investment-tip-overlay .tip-actions {
-  display: flex !important;
-  gap: 15px !important;
-  justify-content: center !important;
-  flex-wrap: wrap !important;
+.stocks-suggestion ul {
+  margin: 0 !important;
+  padding-left: 20px !important;
 }
 
-#investment-tip-overlay .action-btn {
+.stocks-suggestion li {
+  color: #555 !important;
+  margin: 5px 0 !important;
+}
+
+.simulation-section {
+  margin-bottom: 25px !important;
+}
+
+.simulation-section h3 {
+  color: #333 !important;
+  margin-bottom: 20px !important;
+  font-size: 20px !important;
+}
+
+.strategy-grid {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 15px !important;
+  margin: 20px 0 !important;
+}
+
+.strategy-card {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
+  padding: 20px !important;
+  border-radius: 10px !important;
+  text-align: center !important;
+  border: 2px solid #dee2e6 !important;
+}
+
+.strategy-card h4 {
+  color: #333 !important;
+  margin-bottom: 10px !important;
+  font-size: 16px !important;
+}
+
+.projected-value {
+  font-size: 24px !important;
+  font-weight: bold !important;
+  color: #28a745 !important;
+  margin: 10px 0 !important;
+}
+
+.strategy-desc {
+  color: #666 !important;
+  font-size: 14px !important;
+  margin: 0 !important;
+}
+
+.action-buttons {
+  display: grid !important;
+  grid-template-columns: repeat(2, 1fr) !important;
+  gap: 10px !important;
+  margin-top: 30px !important;
+}
+
+.primary-btn, .secondary-btn, .success-btn, .tertiary-btn {
   padding: 12px 20px !important;
   border: none !important;
   border-radius: 8px !important;
-  cursor: pointer !important;
-  font-weight: 600 !important;
-  font-size: 14px !important;
-  transition: all 0.2s ease !important;
-  min-width: 140px !important;
-}
-
-#investment-tip-overlay .action-btn:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
-}
-
-#investment-tip-overlay .action-btn:active {
-  transform: translateY(0) !important;
-}
-
-#investment-tip-overlay .action-btn.primary {
-  background: linear-gradient(45deg, #4CAF50, #45a049) !important;
-  color: white !important;
-}
-
-#investment-tip-overlay .action-btn.secondary {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Notification bubble styles */
-.shopping-advisor-notification {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
-  position: fixed !important;
-  top: 90px !important;
-  right: 20px !important;
-  background: linear-gradient(45deg, #667eea, #764ba2) !important;
-  color: white !important;
-  padding: 16px 20px !important;
-  border-radius: 12px !important;
-  box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4) !important;
-  z-index: 999998 !important;
-  max-width: 320px !important;
-  font-size: 14px !important;
-  line-height: 1.4 !important;
-  animation: slideIn 0.3s ease-out !important;
-  border: 1px solid rgba(255, 255, 255, 0.2) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-.shopping-advisor-notification button {
-  background: none !important;
-  border: none !important;
-  color: white !important;
-  font-size: 18px !important;
-  cursor: pointer !important;
-  margin-left: 10px !important;
-  opacity: 0.7 !important;
-  padding: 0 !important;
-  transition: opacity 0.2s !important;
-}
-
-.shopping-advisor-notification button:hover {
-  opacity: 1 !important;
-  transform: scale(1.1) !important;
-}
-
-/* Price highlighting styles */
-.shopping-advisor-highlighted-price {
-  background: linear-gradient(45deg, #4CAF50, #8BC34A) !important;
-  color: white !important;
-  padding: 3px 8px !important;
-  border-radius: 6px !important;
+  font-size: 16px !important;
   font-weight: bold !important;
-  animation: pulse 2s infinite !important;
-  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.3) !important;
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  cursor: pointer !important;
+  transition: all 0.3s ease !important;
+  text-align: center !important;
 }
 
-/* Mobile responsive styles */
-@media (max-width: 480px) {
-  #investment-tip-overlay .tip-content {
-    width: 95% !important;
-    margin: 10px !important;
+.primary-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+  color: white !important;
+}
+
+.secondary-btn {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+  color: white !important;
+}
+
+.success-btn {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%) !important;
+  color: white !important;
+}
+
+.tertiary-btn {
+  background: #6c757d !important;
+  color: white !important;
+}
+
+.primary-btn:hover, .secondary-btn:hover, .success-btn:hover, .tertiary-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+}
+
+/* Notification Styles */
+.investsmart-notification {
+  position: fixed !important;
+  top: 80px !important;
+  right: 20px !important;
+  z-index: 1000001 !important;
+  padding: 15px 20px !important;
+  border-radius: 8px !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  font-weight: 500 !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2) !important;
+  animation: slideInRight 0.3s ease-out !important;
+  max-width: 300px !important;
+  font-size: 14px !important;
+}
+
+.investsmart-notification.success {
+  background: #28a745 !important;
+  color: white !important;
+}
+
+.investsmart-notification.error {
+  background: #dc3545 !important;
+  color: white !important;
+}
+
+.investsmart-notification.info {
+  background: #17a2b8 !important;
+  color: white !important;
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(100%); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+/* Loading Spinner */
+.loading-spinner {
+  border: 4px solid #f3f3f3 !important;
+  border-top: 4px solid #667eea !important;
+  border-radius: 50% !important;
+  width: 40px !important;
+  height: 40px !important;
+  animation: spin 1s linear infinite !important;
+  margin: 20px auto !important;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Pulse Animation */
+@keyframes pulse {
+  0% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4) !important; }
+  50% { box-shadow: 0 6px 30px rgba(102, 126, 234, 0.8) !important; }
+  100% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4) !important; }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .investsmart-modal-content {
+    max-width: 90% !important;
+    margin: 20px !important;
+    padding: 20px !important;
   }
   
-  #investment-tip-overlay .tip-actions {
-    flex-direction: column !important;
+  .strategy-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
   }
   
-  #investment-tip-overlay .action-btn {
-    width: 100% !important;
-    min-width: auto !important;
+  .action-buttons {
+    grid-template-columns: 1fr !important;
   }
   
-  .shopping-advisor-notification {
-    max-width: calc(100vw - 40px) !important;
-    right: 20px !important;
-  }
-  
-  #shopping-advisor-btn {
-    width: 48px !important;
-    height: 48px !important;
-    font-size: 20px !important;
+  #investsmart-btn {
+    width: 100px !important;
+    height: 45px !important;
+    font-size: 14px !important;
   }
 }
 
-/* Dark mode compatibility */
-@media (prefers-color-scheme: dark) {
-  #investment-tip-overlay .tip-content {
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6) !important;
-  }
-  
-  .shopping-advisor-notification {
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.6) !important;
-  }
+/* Ensure modal appears above all other content */
+#investsmart-modal * {
+  box-sizing: border-box !important;
+}
+
+/* Override any site-specific styles that might interfere */
+#investsmart-modal, #investsmart-modal * {
+  all: unset !important;
+}
+
+#investsmart-modal {
+  position: fixed !important;
+  z-index: 1000000 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  background-color: rgba(0,0,0,0.5) !important;
+  backdrop-filter: blur(5px) !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
 }
