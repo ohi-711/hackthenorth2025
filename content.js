@@ -319,6 +319,7 @@ class ProductDetector {
       }
     }
 
+    this.ensurePopupContainer();
     // Show loading state
     this.showLoadingModal();
 
@@ -420,9 +421,37 @@ class ProductDetector {
     });
   }
 
+  ensurePopupContainer() {
+    let popupContainer = document.getElementById('stockswap-popup');
+    if (!popupContainer) {
+        // Create the popup container dynamically
+        popupContainer = document.createElement('div');
+        popupContainer.id = 'stockswap-popup';
+        popupContainer.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        width: 300px;
+        max-height: 400px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        overflow-y: auto;
+        z-index: 1000001;
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        `;
+        document.body.appendChild(popupContainer);
+    }
+    return popupContainer;
+}
+
   showLoadingModal() {
-    const modal = this.createModal();
-    modal.innerHTML = `
+    const popupContainer = document.getElementById('stockswap-popup');
+    if (!popupContainer) {
+        console.error('Popup container not found. Ensure the popup DOM is loaded.');
+        return;
+    }
+    popupContainer.innerHTML = `
       <div class="stockswap-modal-content">
         <h2>🔍 Analyzing Your Purchase...</h2>
         <div class="loading-spinner"></div>
@@ -452,12 +481,12 @@ class ProductDetector {
   }
 
   showFallbackModal() {
-    const modal = this.createModal();
-    modal.innerHTML = `
+    const popupContainer = document.getElementById('stockswap-popup');
+    popupContainer.innerHTML = `
       <div class="stockswap-modal-content">
         <div class="modal-header">
           <h2>💡 Investment Alternative</h2>
-          <span class="close">&times;</span>
+          <span class="close"></span>
         </div>
         
         <div class="product-info">
@@ -504,12 +533,85 @@ class ProductDetector {
       </div>
     `;
 
-    // Add event listeners
-    this.addModalEventListeners(modal);
+    const style = document.createElement('style');
+    style.textContent = `
+        .fallback-modal {
+        padding: 30px;
+        text-align: center;
+        width: 400px;
+        height: auto;
+        border-radius: 15px;
+        }
+
+        .strategy-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        margin: 20px 0;
+        }
+
+        .strategy-card {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 15px;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #dee2e6;
+        }
+
+        .projected-value {
+        font-size: 18px;
+        font-weight: bold;
+        color: #28a745;
+        margin: 10px 0;
+        }
+
+        .action-buttons {
+        display: flex;
+        justify-content: space-around;
+        margin-top: 20px;
+        }
+
+        .success-btn, .tertiary-btn {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        }
+
+        .success-btn {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+        }
+
+        .tertiary-btn {
+        background: #6c757d;
+        color: white;
+        }
+
+        .success-btn:hover, .tertiary-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+    `;
+    document.head.appendChild(style); 
+
+    const closeBtn = popupContainer.querySelector('.close');
+    const notNowBtn = popupContainer.querySelector('#not-now-btn');
+    
+    [closeBtn, notNowBtn].forEach(btn => {
+        if (btn) {
+        btn.addEventListener('click', () => {
+            popupContainer.innerHTML = ''; // Clear the popup content
+        });
+        }
+    });
   }
 
   showInvestmentModal(analysis) {
-    const modal = document.getElementById("stockswap-modal");
+    const popupContainer = document.getElementById('stockswap-popup');
     if (!modal) return;
 
     // Check if we have real portfolio data or fallback data
@@ -573,7 +675,7 @@ class ProductDetector {
       `;
     }
 
-    modal.innerHTML = `
+    popupContainer.innerHTML = `
       <div class="stockswap-modal-content">
         <div class="modal-header">
           <h2>🛍️ Shopping for ${this.currentProduct.name}?</h2>
@@ -635,8 +737,16 @@ class ProductDetector {
       </div>
     `;
 
-    // Add event listeners
-    this.addModalEventListeners(modal);
+    const closeBtn = popupContainer.querySelector('.close');
+    const notNowBtn = popupContainer.querySelector('#not-now-btn');
+    
+    [closeBtn, notNowBtn].forEach(btn => {
+        if (btn) {
+        btn.addEventListener('click', () => {
+            popupContainer.innerHTML = ''; // Clear the popup content
+        });
+        }
+    });
   }
 
   createModal() {
