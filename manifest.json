@@ -1,0 +1,58 @@
+{
+  "manifest_version": 3,
+  "name": "Smart Shopping Stock Advisor",
+  "version": "1.0",
+  "description": "Analyzes shopping prices and recommends stocks based on your savings goals",
+  
+  "permissions": [
+    "activeTab",
+    "storage",
+    "scripting"
+  ],
+  
+  "host_permissions": [
+    "https://api.polygon.io/*",
+    "https://financialmodelingprep.com/*",
+    "https://*/*"
+  ],
+  
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Smart Shopping Stock Advisor",
+    "default_icon": {
+      
+    }
+  },
+  
+  "content_scripts": [
+    {
+      "matches": [
+        "https://*.amazon.com/*",
+        "https://*.amazon.ca/*",
+        "https://*.ebay.com/*",
+        "https://*.walmart.com/*",
+        "https://*.target.com/*",
+        "https://*.bestbuy.com/*",
+        "https://*.shopify.com/*",
+        "https://*/*"
+      ],
+      "js": ["content.js"],
+      "css": ["content.css"]
+    }
+  ],
+  
+  "background": {
+    "service_worker": "background.js"
+  },
+  
+  "icons": {
+    
+  },
+  
+  "web_accessible_resources": [
+    {
+      "resources": ["icons/*"],
+      "matches": ["<all_urls>"]
+    }
+  ]
+}
