@@ -1,5 +1,5 @@
 {
-  "name": "investsmart-shopping-advisor",
+  "name": "stockswap-shopping-advisor",
   "version": "1.0.0",
   "description": "A Chrome extension that transforms online shopping impulses into investment learning opportunities",
   "main": "background.js",
@@ -17,7 +17,7 @@
     "rbc-investease",
     "cohere-ai"
   ],
-  "author": "InvestSmart Team",
+  "author": "StockSwap Team",
   "license": "MIT",
   "dependencies": {
     "axios": "^1.5.0"

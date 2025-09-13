@@ -1,10 +1,10 @@
-# InvestSmart Shopping Advisor 💡💰
+# StockSwap Shopping Advisor 💡💰
 
 A Chrome extension that transforms online shopping impulses into investment learning opportunities using RBC InvestEase's portfolio simulator and Cohere's AI for intelligent suggestions.
 
 ## 🚀 Core Concept
 
-InvestSmart helps students and young adults make smarter financial decisions by showing them investment alternatives to impulse purchases. Instead of buying that $200 gadget, see how investing that money could grow over time!
+StockSwap helps students and young adults make smarter financial decisions by showing them investment alternatives to impulse purchases. Instead of buying that $200 gadget, see how investing that money could grow over time!
 
 ## 🛠️ How It Works
 
@@ -138,7 +138,7 @@ const simulationResults = await Promise.all(
 ```javascript
 // Register team and get JWT
 POST /teams/register
-{ "team_name": "InvestSmart", "contact_email": "team@investsmart.com" }
+{ "team_name": "StockSwap", "contact_email": "team@stockswap.com" }
 
 // Create user as client
 POST /clients
@@ -259,4 +259,4 @@ Built with ❤️ for Hack the North 2025, demonstrating the power of combining 
 
 ---
 
-**Team InvestSmart** - Empowering smart financial decisions, one purchase at a time! 💡💰
+**Team StockSwap** - Empowering smart financial decisions, one purchase at a time! 💡💰

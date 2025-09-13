@@ -1,4 +1,4 @@
-class InvestSmartPopup {
+class StockSwapPopup {
   constructor() {
     this.init();
   }
@@ -178,7 +178,7 @@ class InvestSmartPopup {
           <p>Shopping on ${hostname}?</p>
           <p>Navigate to a product page to see investment alternatives!</p>
           <div class="supported-sites">
-            <small>InvestSmart is active and ready to help</small>
+            <small>StockSwap is active and ready to help</small>
           </div>
         `;
       } catch (error) {
@@ -445,10 +445,10 @@ class InvestSmartPopup {
 
   openHelp() {
     const helpContent = `
-      <h3>How InvestSmart Works</h3>
+      <h3>How StockSwap Works</h3>
       <ol style="text-align: left; margin: 15px 0;">
         <li>Browse shopping websites normally</li>
-        <li>Click the InvestSmart button when you see a product</li>
+        <li>Click the StockSwap button when you see a product</li>
         <li>View investment alternatives and portfolio projections</li>
         <li>Choose to invest instead of purchase</li>
         <li>Track your savings and learning progress</li>
@@ -538,14 +538,14 @@ class InvestSmartPopup {
 
 // Initialize the popup when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
-  new InvestSmartPopup();
+  new StockSwapPopup();
 });
 
 // Listen for storage changes to update stats in real-time
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === 'local' && (changes.totalSavings || changes.avoidedPurchases)) {
     // Reload stats
-    const popup = new InvestSmartPopup();
+    const popup = new StockSwapPopup();
     popup.loadStats();
     popup.loadRecentActivity();
   }

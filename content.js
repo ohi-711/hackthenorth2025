@@ -8,7 +8,7 @@ class ProductDetector {
   init() {
     // Listen for shopping site signal from background
     window.addEventListener('message', (event) => {
-      if (event.data.type === 'INVESTSMART_SHOPPING_SITE') {
+      if (event.data.type === 'STOCKSWAP_SHOPPING_SITE') {
         this.isShoppingSite = true;
         this.startProductDetection();
       }
@@ -44,15 +44,15 @@ class ProductDetector {
 
   createAdvisorButton() {
     // Remove existing button if it exists
-    const existingButton = document.getElementById('investsmart-btn');
+    const existingButton = document.getElementById('stockswap-btn');
     if (existingButton) {
       existingButton.remove();
     }
 
     const button = document.createElement('button');
-    button.id = 'investsmart-btn';
+    button.id = 'stockswap-btn';
     button.innerHTML = '💡💰';
-    button.title = 'InvestSmart: See Investment Alternative';
+    button.title = 'StockSwap: See Investment Alternative';
     
     // Styling for the floating button
     button.style.cssText = `
@@ -264,15 +264,15 @@ class ProductDetector {
   }
 
   updateButtonWithProduct() {
-    const button = document.getElementById('investsmart-btn');
+    const button = document.getElementById('stockswap-btn');
     if (button && this.currentProduct) {
       button.innerHTML = `💡 $${this.currentProduct.price}`;
       button.style.animation = 'pulse 2s infinite';
       
       // Add pulse animation
-      if (!document.getElementById('investsmart-styles')) {
+      if (!document.getElementById('stockswap-styles')) {
         const style = document.createElement('style');
-        style.id = 'investsmart-styles';
+        style.id = 'stockswap-styles';
         style.textContent = `
           @keyframes pulse {
             0% { box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4); }
@@ -397,7 +397,7 @@ class ProductDetector {
   showLoadingModal() {
     const modal = this.createModal();
     modal.innerHTML = `
-      <div class="investsmart-modal-content">
+      <div class="stockswap-modal-content">
         <h2>🔍 Analyzing Your Purchase...</h2>
         <div class="loading-spinner"></div>
         <p>Finding the best investment alternatives for $${this.currentProduct.price}</p>
@@ -428,7 +428,7 @@ class ProductDetector {
   showFallbackModal() {
     const modal = this.createModal();
     modal.innerHTML = `
-      <div class="investsmart-modal-content">
+      <div class="stockswap-modal-content">
         <div class="modal-header">
           <h2>💡 Investment Alternative</h2>
           <span class="close">&times;</span>
@@ -473,11 +473,11 @@ class ProductDetector {
   }
 
   showInvestmentModal(analysis) {
-    const modal = document.getElementById('investsmart-modal');
+    const modal = document.getElementById('stockswap-modal');
     if (!modal) return;
 
     modal.innerHTML = `
-      <div class="investsmart-modal-content">
+      <div class="stockswap-modal-content">
         <div class="modal-header">
           <h2>🛍️ Shopping for ${this.currentProduct.name}?</h2>
           <span class="close">&times;</span>
@@ -540,13 +540,13 @@ class ProductDetector {
 
   createModal() {
     // Remove existing modal
-    const existingModal = document.getElementById('investsmart-modal');
+    const existingModal = document.getElementById('stockswap-modal');
     if (existingModal) {
       existingModal.remove();
     }
 
     const modal = document.createElement('div');
-    modal.id = 'investsmart-modal';
+    modal.id = 'stockswap-modal';
     modal.style.cssText = `
       position: fixed;
       z-index: 1000000;
@@ -563,11 +563,11 @@ class ProductDetector {
     `;
 
     // Add modal styles
-    if (!document.getElementById('investsmart-modal-styles')) {
+    if (!document.getElementById('stockswap-modal-styles')) {
       const style = document.createElement('style');
-      style.id = 'investsmart-modal-styles';
+      style.id = 'stockswap-modal-styles';
       style.textContent = `
-        .investsmart-modal-content {
+        .stockswap-modal-content {
           background: white;
           padding: 30px;
           border-radius: 15px;
@@ -721,7 +721,7 @@ class ProductDetector {
   }
 
   hideModal() {
-    const existingModal = document.getElementById('investsmart-modal');
+    const existingModal = document.getElementById('stockswap-modal');
     if (existingModal) {
       existingModal.remove();
     }
@@ -845,4 +845,4 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true; // Keep message channel open for async response
 });
 
-console.log('InvestSmart Shopping Advisor content script loaded!');
+console.log('StockSwap Shopping Advisor content script loaded!');

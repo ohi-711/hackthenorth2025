@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "InvestSmart Shopping Advisor",
+  "name": "StockSwap Shopping Advisor",
   "version": "1.0.0",
   "description": "Transform online shopping impulses into investment learning opportunities with RBC InvestEase and Cohere AI",
   
@@ -26,7 +26,7 @@
   
   "action": {
     "default_popup": "popup.html",
-    "default_title": "InvestSmart Shopping Advisor"
+    "default_title": "StockSwap Shopping Advisor"
   },
   
   "content_scripts": [

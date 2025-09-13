@@ -1,4 +1,4 @@
-class InvestSmartAPI {
+class StockSwapAPI {
   constructor() {
     this.rbcBaseUrl = "https://2dcq63co40.execute-api.us-east-1.amazonaws.com/dev";
     this.cohereBaseUrl = "https://api.cohere.ai/v1";
@@ -14,7 +14,7 @@ class InvestSmartAPI {
 
   async init() {
     try {
-      console.log('Initializing InvestSmart API...');
+      console.log('Initializing StockSwap API...');
       
       // Load stored credentials
       const stored = await chrome.storage.local.get(["jwtToken", "clientId"]);
@@ -36,9 +36,9 @@ class InvestSmartAPI {
       }
 
       this.isInitialized = true;
-      console.log('InvestSmart API initialized successfully');
+      console.log('StockSwap API initialized successfully');
     } catch (error) {
-      console.error('Failed to initialize InvestSmart API:', error);
+      console.error('Failed to initialize StockSwap API:', error);
       this.isInitialized = false;
     }
   }
@@ -61,8 +61,8 @@ class InvestSmartAPI {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          team_name: `InvestSmart_${Date.now()}`, // Make team name unique
-          contact_email: `team${Date.now()}@investsmart.com`,
+          team_name: `StockSwap_${Date.now()}`, // Make team name unique
+          contact_email: `team${Date.now()}@stockswap.com`,
         }),
       });
 
@@ -192,10 +192,10 @@ class InvestSmartAPI {
 }
 
 // Initialize API instance
-const investSmartAPI = new InvestSmartAPI();
+const investSmartAPI = new StockSwapAPI();
 
 // Keep service worker alive
-console.log('InvestSmart background script loaded');
+console.log('StockSwap background script loaded');
 
 // Message handling
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -299,7 +299,7 @@ chrome.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
           target: { tabId: tabId },
           func: () => {
             // Signal to content script that this is a shopping site
-            window.postMessage({ type: "INVESTSMART_SHOPPING_SITE" }, "*");
+            window.postMessage({ type: "STOCKSWAP_SHOPPING_SITE" }, "*");
           },
         });
       } catch (error) {
@@ -330,7 +330,7 @@ function isShoppingWebsite(url) {
 
 // Installation handler
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("InvestSmart Shopping Advisor installed");
+  console.log("StockSwap Shopping Advisor installed");
   // Initialize storage
   chrome.storage.local.set({
     totalSavings: 0,
@@ -343,7 +343,7 @@ chrome.runtime.onInstalled.addListener(() => {
 chrome.runtime.onInstalled.addListener(() => {
   chrome.contextMenus.create({
     id: "analyzePrice",
-    title: "Analyze with InvestSmart",
+    title: "Analyze with StockSwap",
     contexts: ["selection"],
   });
 });
@@ -363,4 +363,4 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   }
 });
 
-console.log("InvestSmart Shopping Advisor background script loaded!");
+console.log("StockSwap Shopping Advisor background script loaded!");
