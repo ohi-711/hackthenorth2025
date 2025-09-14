@@ -135,18 +135,80 @@ class ProductDetector {
     const title = document.querySelector(
       '#productTitle, [data-a-size="large"]'
     );
-    const price = document.querySelector(".a-price-whole, .a-offscreen");
+
+    // Try multiple price selectors
+    const priceSelectors = [
+      ".a-price-whole",
+      ".a-offscreen",
+      ".a-price .a-offscreen",
+      ".a-price-symbol + .a-price-whole",
+      '[data-a-size="large"] .a-offscreen',
+      ".apexPriceToPay .a-offscreen",
+      "#priceblock_dealprice",
+      "#priceblock_ourprice",
+      ".a-price-range",
+      ".a-price",
+      "[data-a-price-amount]",
+      ".a-price-fraction",
+    ];
+
+    let price = null;
+    let priceText = "";
+
+    // Try each selector until we find a price
+    for (const selector of priceSelectors) {
+      const priceEl = document.querySelector(selector);
+      if (priceEl) {
+        priceText =
+          priceEl.textContent ||
+          priceEl.getAttribute("data-a-price-amount") ||
+          "";
+        if (priceText && priceText.match(/[\d.,]/)) {
+          price = priceEl;
+          console.log(
+            `✅ Found price with selector "${selector}": "${priceText}"`
+          );
+          break;
+        }
+      }
+    }
+
+    // If still no price, try a broader search
+    if (!price) {
+      console.log(
+        "🔍 No price found with specific selectors, trying broader search..."
+      );
+      const allPriceElements = document.querySelectorAll("*");
+      for (const el of allPriceElements) {
+        const text = el.textContent || "";
+        if (text.match(/^\$[\d,]+\.?\d*$/) && el.offsetHeight > 0) {
+          price = el;
+          priceText = text;
+          console.log(
+            `✅ Found price with broad search: "${text}" in element:`,
+            el
+          );
+          break;
+        }
+      }
+    }
+
     const brand = document.querySelector("#bylineInfo, .a-link-normal");
 
     console.log("Amazon product detection:", {
       title: title ? title.textContent.trim() : "Not found",
-      price: price ? price.textContent : "Not found",
+      price: price ? priceText : "Not found",
+      priceElement: price ? price.tagName + "." + price.className : "None",
       brand: brand ? brand.textContent.trim() : "Not found",
     });
 
-    if (title && price) {
-      const priceText = price.textContent.replace(/[^0-9.,]/g, "");
-      const priceValue = parseFloat(priceText.replace(",", ""));
+    if (title && price && priceText) {
+      const cleanPriceText = priceText.replace(/[^0-9.,]/g, "");
+      const priceValue = parseFloat(cleanPriceText.replace(",", ""));
+
+      console.log(
+        `🔍 Price parsing: "${priceText}" -> "${cleanPriceText}" -> ${priceValue}`
+      );
 
       const productData = {
         name: title.textContent.trim(),
@@ -422,12 +484,12 @@ class ProductDetector {
   }
 
   ensurePopupContainer() {
-    let popupContainer = document.getElementById('stockswap-popup');
+    let popupContainer = document.getElementById("stockswap-popup");
     if (!popupContainer) {
-        // Create the popup container dynamically
-        popupContainer = document.createElement('div');
-        popupContainer.id = 'stockswap-popup';
-        popupContainer.style.cssText = `
+      // Create the popup container dynamically
+      popupContainer = document.createElement("div");
+      popupContainer.id = "stockswap-popup";
+      popupContainer.style.cssText = `
         position: fixed;
         bottom: 20px;
         right: 20px;
@@ -440,16 +502,18 @@ class ProductDetector {
         z-index: 1000001;
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         `;
-        document.body.appendChild(popupContainer);
+      document.body.appendChild(popupContainer);
     }
     return popupContainer;
-}
+  }
 
   showLoadingModal() {
-    const popupContainer = document.getElementById('stockswap-popup');
+    const popupContainer = document.getElementById("stockswap-popup");
     if (!popupContainer) {
-        console.error('Popup container not found. Ensure the popup DOM is loaded.');
-        return;
+      console.error(
+        "Popup container not found. Ensure the popup DOM is loaded."
+      );
+      return;
     }
     popupContainer.innerHTML = `
       <div class="stockswap-modal-content">
@@ -481,7 +545,7 @@ class ProductDetector {
   }
 
   showFallbackModal() {
-    const popupContainer = document.getElementById('stockswap-popup');
+    const popupContainer = document.getElementById("stockswap-popup");
     popupContainer.innerHTML = `
       <div class="stockswap-modal-content">
         <div class="modal-header">
@@ -533,7 +597,7 @@ class ProductDetector {
       </div>
     `;
 
-    const style = document.createElement('style');
+    const style = document.createElement("style");
     style.textContent = `
         .fallback-modal {
         padding: 30px;
@@ -596,23 +660,23 @@ class ProductDetector {
         box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
     `;
-    document.head.appendChild(style); 
+    document.head.appendChild(style);
 
-    const closeBtn = popupContainer.querySelector('.close');
-    const notNowBtn = popupContainer.querySelector('#not-now-btn');
-    
-    [closeBtn, notNowBtn].forEach(btn => {
-        if (btn) {
-        btn.addEventListener('click', () => {
-            popupContainer.innerHTML = ''; // Clear the popup content
+    const closeBtn = popupContainer.querySelector(".close");
+    const notNowBtn = popupContainer.querySelector("#not-now-btn");
+
+    [closeBtn, notNowBtn].forEach((btn) => {
+      if (btn) {
+        btn.addEventListener("click", () => {
+          popupContainer.innerHTML = ""; // Clear the popup content
         });
-        }
+      }
     });
   }
 
   showInvestmentModal(analysis) {
-    const popupContainer = document.getElementById('stockswap-popup');
-    if (!modal) return;
+    const popupContainer = document.getElementById("stockswap-popup");
+    if (!popupContainer) return;
 
     // Check if we have real portfolio data or fallback data
     const hasPortfolios =
@@ -699,13 +763,17 @@ class ProductDetector {
           }</p>
           
           ${
-            analysis.stocks
+            analysis.stocks && analysis.stocks.length > 0
               ? `
             <div class="stocks-suggestion">
               <h4>Recommended Stocks:</h4>
-              <ul>
-                ${analysis.stocks.map((stock) => `<li>${stock}</li>`).join("")}
-              </ul>
+              <div class="stock-list">
+                ${analysis.stocks
+                  .map((stock, index) => {
+                    return `<span class="stock-ticker" style="display: inline-block; margin: 0 8px 4px 0; padding: 8px 16px; background: linear-gradient(135deg, #28a745 0%, #20c997 100%); color: white; border-radius: 25px; font-weight: bold; min-width: 50px; text-align: center;">${stock}</span>`;
+                  })
+                  .join("")}
+              </div>
             </div>
           `
               : ""
@@ -737,15 +805,15 @@ class ProductDetector {
       </div>
     `;
 
-    const closeBtn = popupContainer.querySelector('.close');
-    const notNowBtn = popupContainer.querySelector('#not-now-btn');
-    
-    [closeBtn, notNowBtn].forEach(btn => {
-        if (btn) {
-        btn.addEventListener('click', () => {
-            popupContainer.innerHTML = ''; // Clear the popup content
+    const closeBtn = popupContainer.querySelector(".close");
+    const notNowBtn = popupContainer.querySelector("#not-now-btn");
+
+    [closeBtn, notNowBtn].forEach((btn) => {
+      if (btn) {
+        btn.addEventListener("click", () => {
+          popupContainer.innerHTML = ""; // Clear the popup content
         });
-        }
+      }
     });
   }
 
@@ -782,8 +850,9 @@ class ProductDetector {
           background: white;
           padding: 30px;
           border-radius: 15px;
-          max-width: 600px;
-          max-height: 80vh;
+          max-width: 800px;
+          max-height: 85vh;
+          width: 90vw;
           overflow-y: auto;
           box-shadow: 0 20px 40px rgba(0,0,0,0.1);
           position: relative;
@@ -904,6 +973,35 @@ class ProductDetector {
         .primary-btn:hover, .secondary-btn:hover, .success-btn:hover, .tertiary-btn:hover {
           transform: translateY(-2px);
           box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .stock-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 10px;
+          margin-top: 10px;
+          align-items: center;
+        }
+        
+        .stock-ticker {
+          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+          color: white;
+          padding: 8px 16px;
+          border-radius: 25px;
+          font-size: 14px;
+          font-weight: bold;
+          display: inline-block;
+          margin-right: 8px;
+          margin-bottom: 4px;
+          transition: transform 0.2s ease;
+          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+          min-width: 50px;
+          text-align: center;
+        }
+        
+        .stock-ticker:hover {
+          transform: scale(1.05);
+          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
       `;
       document.head.appendChild(style);
