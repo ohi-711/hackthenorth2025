@@ -1,7 +1,7 @@
 
 importScripts("secrets.js");
 if(typeof COHERE_API_KEY === "undefined" || !COHERE_API_KEY) {
-  throw Error("no cohere api key! edit /secrets.js");
+  throw Error("no cohere api key! create /secrets.js with `const COHERE_API_KEY = \"your api key here\"`");
 }
 
 class StockSwapAPI {

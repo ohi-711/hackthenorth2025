@@ -47,6 +47,7 @@ class ProductDetector {
       "amazon.com",
       "amazon.ca",
       "ebay.com",
+      "ebay.ca",
       "walmart.com",
       "target.com",
       "bestbuy.com",
@@ -248,7 +249,7 @@ class ProductDetector {
 
   extractEbayProduct() {
     const title = document.querySelector(".x-item-title-label, h1");
-    const price = document.querySelector(".notranslate");
+    const price = document.querySelector(".x-price-primary");
 
     if (title && price) {
       const priceText = price.textContent.replace(/[^0-9.,]/g, "");
@@ -419,7 +420,7 @@ class ProductDetector {
               action: "analyzeProduct",
               productData: this.currentProduct,
             },
-            30000
+            3000
           ); // Increase timeout to 30 seconds
           break;
         } catch (error) {
@@ -514,7 +515,7 @@ class ProductDetector {
         bottom: 20px;
         right: 20px;
         width: 600px;
-        max-height: 400px;
+        max-height: 80vh;
         background: white;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
@@ -592,7 +593,7 @@ class ProductDetector {
         <div class="product-info">
           <p><strong>Instead of spending:</strong> $${
             this.currentProduct.price
-          }</p>
+          } on this...</p>
         </div>
 
         <div class="investment-suggestion">
