@@ -51,8 +51,9 @@ class ProductDetector {
       "walmart.com",
       "target.com",
       "bestbuy.com",
-      "shopify.com",
+      "bestbuy.ca",
       "etsy.com",
+      "aliexpress.com",
     ];
 
     return shoppingSites.some((site) => hostname.includes(site));
@@ -133,22 +134,18 @@ class ProductDetector {
   extractProductData() {
     const hostname = window.location.hostname.toLowerCase();
 
-    // Amazon detection
-    if (hostname.includes("amazon")) {
-      return this.extractAmazonProduct();
-    }
+    if (hostname.includes("amazon"))
+      return this.extractAmazonProduextractEbayProductct();
 
-    // eBay detection
-    if (hostname.includes("ebay")) {
-      return this.extractEbayProduct();
-    }
+    if (hostname.includes("ebay"))
+      return this.extractFromSelectors(".x-item-title-label, h1", ".x-price-primary");
 
-    // Best Buy detection
-    if (hostname.includes("bestbuy")) {
-      return this.extractBestBuyProduct();
-    }
+    if (hostname.includes("bestbuy"))
+      return this.extractFromSelectors(".productSummaryContainer_1ygYa > h1", `[data-automation="product-price"] > :first-child`, { category: "Electronics" });
 
-    // Generic detection
+    if (hostname.includes("aliexpress"))
+      return this.extractFromSelectors(`[data-pl="product-title"]`, ".price-default--current--F8OlYIo");
+
     return this.extractGenericProduct();
   }
 
@@ -247,9 +244,9 @@ class ProductDetector {
     return null;
   }
 
-  extractEbayProduct() {
-    const title = document.querySelector(".x-item-title-label, h1");
-    const price = document.querySelector(".x-price-primary");
+  extractFromSelectors(titleSel, priceSel, options) {
+    const title = document.querySelector(titleSel);
+    const price = document.querySelector(priceSel);
 
     if (title && price) {
       const priceText = price.textContent.replace(/[^0-9.,]/g, "");
@@ -261,26 +258,8 @@ class ProductDetector {
         brand: "Various",
         category: "General",
         url: window.location.href,
-      };
-    }
 
-    return null;
-  }
-
-  extractBestBuyProduct() {
-    const title = document.querySelector(".heading-5, .sr-only");
-    const price = document.querySelector(".sr-only, .pricing-price__range");
-
-    if (title && price) {
-      const priceText = price.textContent.replace(/[^0-9.,]/g, "");
-      const priceValue = parseFloat(priceText.replace(",", ""));
-
-      return {
-        name: title.textContent.trim(),
-        price: priceValue,
-        brand: "Various",
-        category: "Electronics",
-        url: window.location.href,
+        ...options
       };
     }
 
@@ -591,9 +570,9 @@ class ProductDetector {
         </div>
 
         <div class="product-info">
-          <p><strong>Instead of spending:</strong> $${
+          <p>Instead of spending <strong>$${
             this.currentProduct.price
-          } on this...</p>
+          }</strong> on a ${this.currentProduct.name}:</p>
         </div>
 
         <div class="investment-suggestion">
@@ -701,6 +680,9 @@ class ProductDetector {
 
     const closeBtn = popupContainer.querySelector(".close");
     const notNowBtn = popupContainer.querySelector("#not-now-btn");
+    popupContainer.querySelector("success-btn").addEventListener("click", () => {
+      window.open("https://www.rbcdirectinvesting.com/", "_self");
+    })
 
     [closeBtn, notNowBtn].forEach((btn) => {
       if (btn) {
@@ -782,7 +764,9 @@ class ProductDetector {
         </div>
 
         <div class="product-info">
-          <p><strong>Price:</strong> $${this.currentProduct.price}</p>
+          <p>Instead of spending <strong>$${
+            this.currentProduct.price
+          }</strong> on a ${this.currentProduct.name}:</p>
           ${
             apiSource === "rbc_api"
               ? '<p class="api-badge">🔗 Powered by RBC InvestEase API</p>'

@@ -867,7 +867,7 @@ class StockSwapAPI {
         stocks: aiSuggestions.stocks,
         portfolios: portfolios,
         education: aiSuggestions.education,
-        explanation: `Instead of spending $${productData.price} on this item, see how investing that money could grow:`,
+        explanation: `Instead of spending $${productData.price} on a ${productData.name}, see how investing that money could grow:`,
         api_source: portfolios.some((p) => p.source === "rbc_api")
           ? "rbc_api"
           : "fallback",
@@ -885,7 +885,7 @@ class StockSwapAPI {
             this.getFallbackPortfolio("aggressive", productData.price),
           ],
           education: aiSuggestions.education,
-          explanation: `Instead of spending $${productData.price} on this item, see how investing that money could grow:`,
+          explanation: `Instead of spending $${productData.price} on a ${productData.name}, see how investing that money could grow:`,
           api_source: "ai_fallback",
         };
       } catch (aiError) {
