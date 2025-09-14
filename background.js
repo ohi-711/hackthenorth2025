@@ -1,9 +1,15 @@
+
+importScripts("secrets.js");
+if(typeof COHERE_API_KEY === "undefined" || !COHERE_API_KEY) {
+  throw Error("no cohere api key! edit /secrets.js");
+}
+
 class StockSwapAPI {
   constructor() {
     this.rbcBaseUrl =
       "https://2dcq63co40.execute-api.us-east-1.amazonaws.com/dev";
     this.cohereBaseUrl = "https://api.cohere.ai/v1";
-    this.cohereApiKey = ""; // replace with api key !!
+    this.cohereApiKey = COHERE_API_KEY;
     this.jwtToken = null;
     this.clientId = null;
     this.initPromise = null;
