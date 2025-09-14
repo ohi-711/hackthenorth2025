@@ -513,7 +513,7 @@ class ProductDetector {
         position: fixed;
         bottom: 20px;
         right: 20px;
-        width: 300px;
+        width: 600px;
         max-height: 400px;
         background: white;
         border-radius: 10px;
