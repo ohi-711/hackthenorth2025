@@ -1,3 +1,23 @@
+
+async function popupClose(popupContainer) {
+  const anim = popupContainer.animate([
+    {
+      scale: 1,
+    },
+    {
+      scale: 0,
+    }
+  ],
+  {
+    duration: 200,
+    easing: "ease-out",
+  });
+  console.log(1);
+  await anim.finished;
+  console.log(2);
+  popupContainer.remove();
+}
+
 class ProductDetector {
   constructor() {
     this.isShoppingSite = false;
@@ -500,6 +520,8 @@ class ProductDetector {
         box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         overflow-y: auto;
         z-index: 1000001;
+        transform-origin: bottom center;
+
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
         `;
       document.body.appendChild(popupContainer);
@@ -535,13 +557,27 @@ class ProductDetector {
         animation: spin 1s linear infinite;
         margin: 20px auto;
       }
-      
+
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
       }
     `;
     document.head.appendChild(style);
+
+    popupContainer.animate([
+      {
+        scale: 0,
+      },
+      {
+        scale: 1,
+      }
+    ],
+    {
+      duration: 200,
+      easing: "ease-out",
+    });
+
   }
 
   showFallbackModal() {
@@ -552,19 +588,19 @@ class ProductDetector {
           <h2>💡 Investment Alternative</h2>
           <span class="close"></span>
         </div>
-        
+
         <div class="product-info">
           <p><strong>Instead of spending:</strong> $${
             this.currentProduct.price
           }</p>
         </div>
-        
+
         <div class="investment-suggestion">
           <h3>Consider This Investment Strategy:</h3>
           <p>Rather than purchasing this item, consider investing that money in a diversified portfolio. Here's what your $${
             this.currentProduct.price
           } could become:</p>
-          
+
           <div class="strategy-grid">
             <div class="strategy-card">
               <h4>Conservative (7% annual return)</h4>
@@ -589,7 +625,7 @@ class ProductDetector {
             </div>
           </div>
         </div>
-        
+
         <div class="action-buttons">
           <button id="skip-purchase-btn" class="success-btn">✅ Skip Purchase & Save</button>
           <button id="not-now-btn" class="tertiary-btn">❌ Not Now</button>
@@ -667,9 +703,7 @@ class ProductDetector {
 
     [closeBtn, notNowBtn].forEach((btn) => {
       if (btn) {
-        btn.addEventListener("click", () => {
-          popupContainer.innerHTML = ""; // Clear the popup content
-        });
+        btn.addEventListener("click", () => popupClose(popupContainer));
       }
     });
   }
@@ -743,9 +777,9 @@ class ProductDetector {
       <div class="stockswap-modal-content">
         <div class="modal-header">
           <h2>🛍️ Shopping for ${this.currentProduct.name}?</h2>
-          <span class="close">&times;</span>
+          <span class="close"></span>
         </div>
-        
+
         <div class="product-info">
           <p><strong>Price:</strong> $${this.currentProduct.price}</p>
           ${
@@ -754,14 +788,14 @@ class ProductDetector {
               : ""
           }
         </div>
-        
+
         <div class="investment-suggestion">
           <h3>💡 Investment Alternative:</h3>
           <p>${
             analysis.explanation ||
             `Instead of spending $${this.currentProduct.price}, see how investing could grow your money:`
           }</p>
-          
+
           ${
             analysis.stocks && analysis.stocks.length > 0
               ? `
@@ -778,7 +812,7 @@ class ProductDetector {
           `
               : ""
           }
-          
+
           ${
             analysis.education
               ? `
@@ -790,14 +824,14 @@ class ProductDetector {
               : ""
           }
         </div>
-        
+
         <div class="simulation-section">
           <h3>📊 Portfolio Strategy Comparison</h3>
           <div class="strategy-grid">
             ${strategyCardsHTML}
           </div>
         </div>
-        
+
         <div class="action-buttons">
           <button id="skip-purchase-btn" class="success-btn">✅ Skip Purchase & Invest</button>
           <button id="not-now-btn" class="tertiary-btn">❌ Not Now</button>
@@ -810,9 +844,7 @@ class ProductDetector {
 
     [closeBtn, notNowBtn].forEach((btn) => {
       if (btn) {
-        btn.addEventListener("click", () => {
-          popupContainer.innerHTML = ""; // Clear the popup content
-        });
+        btn.addEventListener("click", () => popupClose(popupContainer));
       }
     });
   }
@@ -840,172 +872,6 @@ class ProductDetector {
       align-items: center;
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     `;
-
-    // Add modal styles
-    if (!document.getElementById("stockswap-modal-styles")) {
-      const style = document.createElement("style");
-      style.id = "stockswap-modal-styles";
-      style.textContent = `
-        .stockswap-modal-content {
-          background: white;
-          padding: 30px;
-          border-radius: 15px;
-          max-width: 800px;
-          max-height: 85vh;
-          width: 90vw;
-          overflow-y: auto;
-          box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-          position: relative;
-          animation: slideIn 0.3s ease-out;
-        }
-        
-        @keyframes slideIn {
-          from { transform: translateY(-50px); opacity: 0; }
-          to { transform: translateY(0); opacity: 1; }
-        }
-        
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-          border-bottom: 2px solid #f0f0f0;
-          padding-bottom: 15px;
-        }
-        
-        .close {
-          font-size: 28px;
-          cursor: pointer;
-          color: #aaa;
-        }
-        
-        .close:hover {
-          color: #000;
-        }
-        
-        .strategy-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 15px;
-          margin: 20px 0;
-        }
-        
-        .strategy-card {
-          background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-          padding: 20px;
-          border-radius: 10px;
-          text-align: center;
-          border: 2px solid #dee2e6;
-        }
-        
-        .strategy-card.api-powered {
-          background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
-          border: 2px solid #2196f3;
-        }
-        
-        .strategy-card.estimated {
-          background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
-          border: 2px solid #ff9800;
-        }
-        
-        .data-source {
-          font-size: 12px;
-          color: #666;
-          font-weight: normal;
-          margin-top: 5px;
-          display: block;
-        }
-        
-        .api-badge {
-          background: linear-gradient(135deg, #2196f3 0%, #1976d2 100%);
-          color: white;
-          padding: 4px 8px;
-          border-radius: 12px;
-          font-size: 12px;
-          display: inline-block;
-          margin-top: 5px;
-        }
-        
-        .projected-value {
-          font-size: 24px;
-          font-weight: bold;
-          color: #28a745;
-          margin: 10px 0;
-        }
-        
-        .action-buttons {
-          display: grid;
-          grid-template-columns: repeat(2, 1fr);
-          gap: 10px;
-          margin-top: 30px;
-        }
-        
-        .primary-btn, .secondary-btn, .success-btn, .tertiary-btn {
-          padding: 12px 20px;
-          border: none;
-          border-radius: 8px;
-          font-size: 16px;
-          font-weight: bold;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-        
-        .primary-btn {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          color: white;
-        }
-        
-        .secondary-btn {
-          background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-          color: white;
-        }
-        
-        .success-btn {
-          background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-          color: white;
-        }
-        
-        .tertiary-btn {
-          background: #6c757d;
-          color: white;
-        }
-        
-        .primary-btn:hover, .secondary-btn:hover, .success-btn:hover, .tertiary-btn:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .stock-list {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 10px;
-          margin-top: 10px;
-          align-items: center;
-        }
-        
-        .stock-ticker {
-          background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-          color: white;
-          padding: 8px 16px;
-          border-radius: 25px;
-          font-size: 14px;
-          font-weight: bold;
-          display: inline-block;
-          margin-right: 8px;
-          margin-bottom: 4px;
-          transition: transform 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-          min-width: 50px;
-          text-align: center;
-        }
-        
-        .stock-ticker:hover {
-          transform: scale(1.05);
-          box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-      `;
-      document.head.appendChild(style);
-    }
 
     document.body.appendChild(modal);
     return modal;
